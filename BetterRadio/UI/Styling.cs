@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using TLDLoader.Utilities.UI;
 using UnityEngine;
 
 namespace BetterRadio.UI
@@ -104,25 +103,25 @@ namespace BetterRadio.UI
 				List<GUIStyle> styles = new List<GUIStyle>();
 
 				// Create any required core textures.
-				_black = Common.ColorTexture(1, 1, new Color(0f, 0f, 0f));
-				_blackHover = Common.ColorTexture(1, 1, new Color(0.1f, 0.1f, 0.1f));
-				_white = Common.ColorTexture(1, 1, new Color(1f, 1f, 1f));
-				_whiteHover = Common.ColorTexture(1, 1, new Color(0.9f, 0.9f, 0.9f));
-				_transparent = Common.ColorTexture(1, 1, new Color(0, 0, 0, 0));
-				_orange = Common.ColorTexture(1, 1, new Color(0.91f, 0.55f, 0.12f));
-				_orangeHover = Common.ColorTexture(1, 1, new Color(0.91f, 0.55f, 0.12f, 0.7f));
-				_red = Common.ColorTexture(1, 1, new Color(0.91f, 0.14f, 0.12f, 0.6f));
-				_redHover = Common.ColorTexture(1, 1, new Color(0.91f, 0.14f, 0.12f, 0.7f));
-				_blue = Common.ColorTexture(1, 1, new Color(0.161f, 0.463f, 0.859f, 0.6f));
-				_blueHover = Common.ColorTexture(1, 1, new Color(0.161f, 0.463f, 0.859f, 0.7f));
+				_black = new ColorTexture(new Color(0f, 0f, 0f)).Texture;
+				_blackHover = new ColorTexture(new Color(0.1f, 0.1f, 0.1f)).Texture;
+				_white = new ColorTexture(new Color(1f, 1f, 1f)).Texture;
+				_whiteHover = new ColorTexture(new Color(0.9f, 0.9f, 0.9f)).Texture;
+				_transparent = new ColorTexture(new Color(0, 0, 0, 0)).Texture;
+				_orange = new ColorTexture(new Color(0.91f, 0.55f, 0.12f)).Texture;
+				_orangeHover = new ColorTexture(new Color(0.91f, 0.55f, 0.12f, 0.7f)).Texture;
+				_red = new ColorTexture(new Color(0.91f, 0.14f, 0.12f, 0.6f)).Texture;
+				_redHover = new ColorTexture(new Color(0.91f, 0.14f, 0.12f, 0.7f)).Texture;
+				_blue = new ColorTexture(new Color(0.161f, 0.463f, 0.859f, 0.6f)).Texture;
+				_blueHover = new ColorTexture(new Color(0.161f, 0.463f, 0.859f, 0.7f)).Texture;
 
-				_buttonPrimary = Common.ColorTexture(1, 1, new Color(0.4f, 0.4f, 0.4f));
-				_buttonPrimaryHover = Common.ColorTexture(1, 1, new Color(0.5f, 0.5f, 0.5f));
-				_buttonSecondary = Common.ColorTexture(1, 1, new Color(0.15f, 0.15f, 0.15f));
-				_buttonSecondaryHover = Common.ColorTexture(1, 1, new Color(0.25f, 0.25f, 0.25f));
-				_box = Common.ColorTexture(1, 1, new Color(0, 0, 0, 0.4f));
-				_boxHover = Common.ColorTexture(1, 1, new Color(0, 0, 0, 0.5f));
-				_boxDark = Common.ColorTexture(1, 1, new Color(0, 0, 0, 0.6f));
+				_buttonPrimary = new ColorTexture(new Color(0.4f, 0.4f, 0.4f)).Texture;
+				_buttonPrimaryHover = new ColorTexture(new Color(0.5f, 0.5f, 0.5f)).Texture;
+				_buttonSecondary = new ColorTexture(new Color(0.15f, 0.15f, 0.15f)).Texture;
+				_buttonSecondaryHover = new ColorTexture(new Color(0.25f, 0.25f, 0.25f)).Texture;
+				_box = new ColorTexture(new Color(0, 0, 0, 0.4f)).Texture;
+				_boxHover = new ColorTexture(new Color(0, 0, 0, 0.5f)).Texture;
+				_boxDark = new ColorTexture(new Color(0, 0, 0, 0.6f)).Texture;
 
 				// First colours pass to create translucent variants of each.
 				List<ColorTexture> translucentVariants = new List<ColorTexture>();
@@ -144,9 +143,7 @@ namespace BetterRadio.UI
 				// Second colours pass to set up textures and elements.
 				foreach (var colour in _colours)
 				{
-					colour.Texture = Common.ColorTexture(1, 1, colour.Color);
-					colour.HoverTexture = Common.ColorTexture(1, 1, colour.HoverColor);
-					Color text = Common.GetTextColor(colour.Color);
+					Color text = GetTextColor(colour.Color);
 
 					GUIStyle button = new GUIStyle(buttonStyle);
 					button.name = $"Button{colour.Name}";
@@ -425,6 +422,19 @@ namespace BetterRadio.UI
 			_skin.verticalSliderThumb = new GUIStyle(original.verticalSliderThumb);
 			_skin.window = new GUIStyle(original.window);
 			_skin.font = original.font;
+		}
+
+		private static Color GetTextColor(Color backgroundColour)
+		{
+			// Counting the perceptive luminance - human eye favors green color.     
+			double luminance = (0.299 * backgroundColour.r + 0.587 * backgroundColour.g + 0.114 * backgroundColour.b) / 255;
+
+			if (luminance > 0.5)
+				// Bright colors - black font.
+				return Color.black;
+			else
+				// Dark colors - white font.
+				return Color.white;
 		}
 	}
 }

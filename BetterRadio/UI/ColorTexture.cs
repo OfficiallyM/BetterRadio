@@ -16,6 +16,39 @@ namespace BetterRadio.UI
 			Color = color;
 			hoverColor ??= CalculateHoverColor(color);
 			HoverColor = (Color)hoverColor;
+
+			BuildColorTextures();
+		}
+
+		public ColorTexture(Color color)
+		{
+			Color = color;
+
+			BuildColorTextures();
+		}
+
+		public void BuildColorTextures()
+		{
+			Color[] pixels = new Color[1 * 1];
+			for (int i = 0; i < pixels.Length; i++)
+			{
+				pixels[i] = Color;
+			}
+			Texture = new Texture2D(1, 1);
+			Texture.SetPixels(pixels);
+			Texture.Apply();
+
+			if (HoverColor != null)
+			{
+				Color[] hoverPixels = new Color[1 * 1];
+				for (int i = 0; i < hoverPixels.Length; i++)
+				{
+					hoverPixels[i] = HoverColor;
+				}
+				HoverTexture = new Texture2D(1, 1);
+				HoverTexture.SetPixels(hoverPixels);
+				HoverTexture.Apply();
+			}
 		}
 
 		/// <summary>
