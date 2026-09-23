@@ -69,7 +69,7 @@ namespace BetterRadio.Stations
 					if (hosts.Count > 0)
 					{
 						_cachedHost = hosts[new Random().Next(hosts.Count)];
-						Logging.LogInfo($"Radio Browser server: {_cachedHost}.");
+						Logging.LogDebug($"Radio Browser server: {_cachedHost}.");
 						return _cachedHost;
 					}
 				}
