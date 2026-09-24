@@ -11,4 +11,4 @@
 
 ## Planned features
 - Complete rework of custom radio to remove stuttering
-- - Support for more radio codecs
+- Support for more radio codecs
