@@ -1,4 +1,5 @@
-﻿using BetterRadio.Radio;
+﻿using BetterRadio.CustomRadio;
+using BetterRadio.Radio;
 using HarmonyLib;
 
 namespace BetterRadio.Patches
@@ -59,6 +60,17 @@ namespace BetterRadio.Patches
 			}
 
 			return !skip;
+		}
+	}
+
+	[HarmonyPatch(typeof(custommusicscript), nameof(custommusicscript.LoadRandomSong))]
+	public static class Patch_CustomRadio_LoadRandomSong
+	{
+		private static bool Prefix()
+		{
+			// Take over from custom radio the second a song is requested and skip the original.
+			CustomRadioLoader.Instance.LoadRandomSong();
+			return false;
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using BetterRadio.Radio;
+﻿using BetterRadio.CustomRadio;
+using BetterRadio.Radio;
 using BetterRadio.UI;
 using System.Collections.Generic;
 using TLDLoader;
@@ -9,7 +10,7 @@ namespace BetterRadio
 	public class BetterRadio : Mod
 	{
 		// Mod meta stuff.
-		private string _version = "1.0.0";
+		private string _version = "1.1.0";
 		public override string ID => "M_BetterRadio";
 		public override string Name => "BetterRadio";
 		public override string Author => "M-";
@@ -56,9 +57,10 @@ namespace BetterRadio
 				avaiableTalk = new List<int>(),
 			});
 
-			_helperObj ??= new GameObject("StreamRadio");
+			_helperObj ??= new GameObject("BetterRadio");
 			GameObject.DontDestroyOnLoad(_helperObj);
 			UI = _helperObj.GetComponent<UIManager>() ?? _helperObj.AddComponent<UIManager>();
+			CustomRadioLoader.Initialize(_helperObj);
 		}
 
 		public override void OnLoad()
