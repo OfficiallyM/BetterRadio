@@ -1,7 +1,9 @@
 ﻿using BetterRadio.CustomRadio;
 using BetterRadio.Radio;
+using BetterRadio.Stations;
 using BetterRadio.UI;
 using System.Collections.Generic;
+using System.IO;
 using TLDLoader;
 using UnityEngine;
 
@@ -24,6 +26,7 @@ namespace BetterRadio
 
 		internal static float StreamFR = 99.2f;
 		internal static UIManager UI;
+		internal static StationRepository Stations;
 
 		private GameObject _helperObj;
 
@@ -45,17 +48,8 @@ namespace BetterRadio
 					radio.gameObject.AddComponent<StreamRadio>();
 			}
 
-			mainscript.M.radioChs.Add(new mainscript.radioCH()
-			{
-				name = "stream",
-				FR = StreamFR,
-				music = new List<AudioClip>(),
-				talk = new List<AudioClip>(),
-				musicHoliday = new List<mainscript.holiday>(),
-				talkHoliday = new List<mainscript.holiday>(),
-				avaiableMusic = new List<int>(),
-				avaiableTalk = new List<int>(),
-			});
+			Stations ??= new StationRepository(Path.Combine(ModLoader.GetModConfigFolder(this), "Stations.json"));
+			StreamChannels.Initialise(Stations);
 
 			_helperObj ??= new GameObject("BetterRadio");
 			GameObject.DontDestroyOnLoad(_helperObj);

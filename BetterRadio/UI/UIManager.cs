@@ -1,8 +1,6 @@
 ﻿using BetterRadio.Radio;
 using BetterRadio.Stations;
-using System.IO;
 using System.Linq;
-using TLDLoader;
 using UnityEngine;
 
 namespace BetterRadio.UI
@@ -14,11 +12,11 @@ namespace BetterRadio.UI
 		private const float TitleBarHeight = 30f;
 		private const float CloseButtonSize = 30f;
 		private const float RowHeight = 26f;
+		private const float FrequencyButtonWidth = 80f;
 
 		private bool _showUI = false;
 		private StreamRadio _radio;
-		private StationRepository _repository;
-		private SavedStation _currentStation;
+		private StationRepository Repository => BetterRadio.Stations;
 		private readonly StationBrowser _browser = new StationBrowser();
 		private readonly StationValidator _validator = new StationValidator();
 
@@ -39,13 +37,9 @@ namespace BetterRadio.UI
 		private string _manualUrl = string.Empty;
 		private string _searchText = string.Empty;
 		private bool _showSearchHelp = false;
-
-
-		private void Awake()
-		{
-			string path = Path.Combine(ModLoader.GetModConfigFolder(BetterRadio.Instance), "Stations.json");
-			_repository = new StationRepository(path);
-		}
+		private SavedStation _editingFrequency;
+		private string _frequencyText = string.Empty;
+		private string _frequencyError;
 
 		public void ShowUI(StreamRadio radio, bool animate = true)
 		{
@@ -57,8 +51,6 @@ namespace BetterRadio.UI
 			mainscript.M.crsrLocked = !_showUI;
 			mainscript.M.SetCursorVisible(_showUI);
 			mainscript.M.menu.gameObject.SetActive(!_showUI);
-
-			_currentStation = _repository.GetByUrl(_radio.GetUrl());
 
 			if (!animate)
 			{
@@ -73,6 +65,7 @@ namespace BetterRadio.UI
 		{
 			_showUI = false;
 			_radio = null;
+			_editingFrequency = null;
 
 			mainscript.M.crsrLocked = !_showUI;
 			mainscript.M.SetCursorVisible(_showUI);
@@ -130,9 +123,10 @@ namespace BetterRadio.UI
 			DrawTabBar();
 			GUILayout.Space(5);
 
-			if (_currentStation != null || _radio.IsRunning)
+			string current = _radio.CurrentStationName;
+			if (current != null)
 			{
-				GUILayout.Label($"Current station: {_currentStation?.Name ?? _radio.GetUrl()}", "BadgeBlue");
+				GUILayout.Label($"Current station: {current}", "BadgeBlue");
 				GUILayout.Space(10);
 			}
 
@@ -180,12 +174,12 @@ namespace BetterRadio.UI
 		private void DrawMyStationsTab()
 		{
 			GUILayout.Label("Saved stations", "LabelHeader");
-			GUILayout.Label("Select to play");
+			GUILayout.Label($"Select to play on {StreamChannels.Format(BetterRadio.StreamFR)} FM, or give a station its own frequency to tune to it on the dial");
 
 			_myStationsScroll = GUILayout.BeginScrollView(_myStationsScroll);
 
 			// ToList so Remove during this loop can't invalidate the enumerator mid-draw.
-			foreach (SavedStation station in _repository.Stations.ToList())
+			foreach (SavedStation station in Repository.Stations.ToList())
 			{
 				if (_radio == null) break;
 
@@ -194,14 +188,23 @@ namespace BetterRadio.UI
 				if (GUILayout.Button(station.Name, _radio.GetUrl() == station.Url ? "ButtonSecondary" : "button"))
 				{
 					_radio.SetUrl(station.Url);
-					_currentStation = _repository.GetByUrl(station.Url);
 					HideUI();
 				}
 
+				string frequencyLabel = station.Frequency.HasValue ? $"{StreamChannels.Format(station.Frequency.Value)} FM" : "Set FM";
+				if (GUILayout.Button(frequencyLabel, _editingFrequency == station ? "ButtonSecondary" : "button", GUILayout.Width(FrequencyButtonWidth)))
+					ToggleFrequencyEditor(station);
+
 				if (GUILayout.Button("-", GUILayout.Width(RowHeight)))
-					_repository.Remove(station);
+				{
+					if (_editingFrequency == station) _editingFrequency = null;
+					Repository.Remove(station);
+				}
 
 				GUILayout.EndHorizontal();
+
+				if (_editingFrequency == station)
+					DrawFrequencyEditor(station);
 			}
 
 			GUILayout.EndScrollView();
@@ -209,6 +212,62 @@ namespace BetterRadio.UI
 
 			DrawManualAdd();
 			GUILayout.Space(10);
+		}
+
+		private void ToggleFrequencyEditor(SavedStation station)
+		{
+			if (_editingFrequency == station)
+			{
+				_editingFrequency = null;
+				return;
+			}
+
+			_editingFrequency = station;
+			_frequencyText = station.Frequency.HasValue ? StreamChannels.Format(station.Frequency.Value) : string.Empty;
+			_frequencyError = null;
+		}
+
+		private void DrawFrequencyEditor(SavedStation station)
+		{
+			GUILayout.BeginVertical("box");
+
+			GUILayout.BeginHorizontal();
+			GUILayout.Label("Frequency", GUILayout.ExpandWidth(false));
+
+			string previous = _frequencyText;
+			_frequencyText = GUILayout.TextField(_frequencyText, GUILayout.Width(FrequencyButtonWidth));
+			if (_frequencyText != previous)
+				_frequencyError = null;
+
+			GUILayout.Label("FM", GUILayout.ExpandWidth(false));
+
+			if (GUILayout.Button("Save", GUILayout.ExpandWidth(false)))
+			{
+				float? frequency = StreamChannels.ParseFrequency(_frequencyText, station, out _frequencyError);
+				if (frequency.HasValue)
+				{
+					Repository.SetFrequency(station, frequency);
+					_editingFrequency = null;
+				}
+			}
+
+			GUI.enabled = station.Frequency.HasValue;
+			if (GUILayout.Button("Clear", GUILayout.ExpandWidth(false)))
+			{
+				Repository.SetFrequency(station, null);
+				_editingFrequency = null;
+			}
+			GUI.enabled = true;
+
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			if (_frequencyError != null)
+				GUILayout.Label(_frequencyError, "BadgeRed");
+			else
+				GUILayout.Label($"{StreamChannels.Format(StreamChannels.MinFrequency)} to {StreamChannels.Format(StreamChannels.MaxFrequency)} FM, in steps of 0.1");
+
+			GUILayout.EndVertical();
 		}
 
 		private void DrawManualAdd()
@@ -252,7 +311,7 @@ namespace BetterRadio.UI
 			if (_validator.Success == true) return;
 
 			_validator.Validate(_manualUrl, () => {
-				_repository.Add(new SavedStation { Name = _manualName, Url = _manualUrl });
+				Repository.Add(new SavedStation { Name = _manualName, Url = _manualUrl });
 				_manualName = string.Empty;
 				_manualUrl = string.Empty;
 				_validator.Reset();
@@ -304,13 +363,13 @@ namespace BetterRadio.UI
 			{
 				GUILayout.BeginHorizontal("box", GUILayout.Height(RowHeight));
 
-				bool alreadySaved = _repository.Stations.Any(s => s.Url == result.Url);
+				bool alreadySaved = Repository.Stations.Any(s => s.Url == result.Url);
 				GUILayout.Label($"{result.Name} ({result.Bitrate}kbps, {result.CountryCode})");
 				GUILayout.FlexibleSpace();
 
 				GUI.enabled = !alreadySaved;
 				if (GUILayout.Button(alreadySaved ? "Added" : "Add", GUILayout.Width(60)))
-					_repository.Add(new SavedStation { Name = result.Name, Url = result.Url });
+					Repository.Add(new SavedStation { Name = result.Name, Url = result.Url });
 				GUI.enabled = true;
 
 				GUILayout.EndHorizontal();

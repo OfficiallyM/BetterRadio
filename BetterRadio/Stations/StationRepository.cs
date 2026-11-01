@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,6 +18,9 @@ namespace BetterRadio.Stations
 			_stations = Load();
 		}
 
+		// Raised after every change, so the radio channels for assigned frequencies can be kept in step.
+		public event Action Changed;
+
 		// A copy is handed out so callers can iterate while Add() and Remove() mutate the backing list.
 		public IReadOnlyList<SavedStation> Stations => _stations.ToList();
 
@@ -29,6 +33,12 @@ namespace BetterRadio.Stations
 		public void Remove(SavedStation station)
 		{
 			_stations.Remove(station);
+			Save();
+		}
+
+		public void SetFrequency(SavedStation station, float? frequency)
+		{
+			station.Frequency = frequency;
 			Save();
 		}
 
@@ -59,6 +69,7 @@ namespace BetterRadio.Stations
 		{
 			string json = JsonConvert.SerializeObject(_stations, Formatting.Indented);
 			File.WriteAllText(_path, json);
+			Changed?.Invoke();
 		}
 	}
 }
