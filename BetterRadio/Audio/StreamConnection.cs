@@ -102,7 +102,7 @@ namespace BetterRadio.Audio
 
 		private void RunDirect(WebResponse response)
 		{
-			using Stream stream = new ForwardOnlyStream(response.GetResponseStream());
+			using PeekableStream stream = new PeekableStream(response.GetResponseStream());
 			using IStreamDecoder decoder = StreamDecoderFactory.Create(response.ContentType, stream);
 			Decode(decoder);
 		}

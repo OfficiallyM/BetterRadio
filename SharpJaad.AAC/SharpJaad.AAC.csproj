@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Vendored from https://github.com/jimm98y/SharpJaad (MIT, see LICENSE) at commit 3b2014c, with a fix to HE-AAC
+       decoding marked "BetterRadio fix". Built as its own assembly so the upstream source can stay on its own language
+       version; Costura embeds it into the mod. -->
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <Version>0.1.1</Version>
+  </PropertyGroup>
+
+</Project>

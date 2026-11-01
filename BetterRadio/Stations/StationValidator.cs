@@ -9,9 +9,9 @@ using UnityEngine;
 
 namespace BetterRadio.Stations
 {
-	// Manual entry only supports direct MP3 streams for now, so this probes for exactly that rather than
-	// reusing the HLS-aware routing in StreamConnection. Follows the same background-thread-plus-polled-fields
-	// shape as StationBrowser, for the same reason: no reliable main-thread continuation to await back onto.
+	// Probes a manually entered URL with the same decoder selection playback uses, so anything that validates will play.
+	// Follows the same background-thread-plus-polled-fields shape as StationBrowser, for the same reason: no reliable
+	// main-thread continuation to await back onto.
 	internal class StationValidator
 	{
 		private const string UserAgent = "BetterRadio";
@@ -80,19 +80,15 @@ namespace BetterRadio.Stations
 				request.Timeout = ConnectTimeoutMs;
 
 				using (WebResponse response = request.GetResponse())
-				using (Stream stream = new ForwardOnlyStream(response.GetResponseStream()))
+				using (PeekableStream stream = new PeekableStream(response.GetResponseStream()))
 				{
 					if (token.IsCancellationRequested) return;
 
-					string contentType = (response.ContentType ?? string.Empty).Split(';')[0].Trim();
-					if (!contentType.Equals("audio/mpeg", StringComparison.OrdinalIgnoreCase) && !contentType.Equals("audio/mp3", StringComparison.OrdinalIgnoreCase))
-						throw new NotSupportedException($"'{contentType}' is not a supported MP3 stream.");
-
-					using (Mp3StreamDecoder decoder = new Mp3StreamDecoder(stream))
+					using (IStreamDecoder decoder = StreamDecoderFactory.Create(response.ContentType, stream))
 					{
 						float[] probe = new float[ProbeSampleCount];
 
-						// A handful of decoded samples is enough to confirm this is really MP3 data, not just a matching content type.
+						// A handful of decoded samples is enough to confirm this is really audio we can play, not just a matching content type.
 						if (decoder.ReadSamples(probe, 0, probe.Length) <= 0)
 							throw new InvalidDataException("Connected, but no audio could be decoded.");
 					}

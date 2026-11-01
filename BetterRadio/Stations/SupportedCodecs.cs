@@ -8,6 +8,11 @@ namespace BetterRadio.Stations
 		public static readonly HashSet<string> Names = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
 		{
 			"MP3",
+			"AAC",
+			"AAC+",
+			"OGG",
+			"OPUS",
+			"FLAC",
 		};
 	}
 }

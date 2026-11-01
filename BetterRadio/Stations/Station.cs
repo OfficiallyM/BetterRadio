@@ -13,6 +13,10 @@ namespace BetterRadio.Stations
 		[JsonProperty("codec")]
 		public string Codec { get; set; }
 
+		// 1 for HLS playlists, which are not supported, since they are not one continuous stream of audio.
+		[JsonProperty("hls")]
+		public int Hls { get; set; }
+
 		[JsonProperty("bitrate")]
 		public int Bitrate { get; set; }
 

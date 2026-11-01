@@ -168,6 +168,7 @@ namespace BetterRadio.Stations
 						foreach (Station station in batch)
 						{
 							if (!SupportedCodecs.Names.Contains(station.Codec)) continue;
+							if (station.Hls != 0) continue;
 							if (string.IsNullOrEmpty(station.UrlResolved)) continue;
 							if (!MatchesAll(station, query)) continue;
 

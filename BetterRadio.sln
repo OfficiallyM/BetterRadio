@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BetterRadio", "BetterRadio\BetterRadio.csproj", "{755F3AEA-0356-4DD7-B724-C5E56F53F094}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpJaad.AAC", "SharpJaad.AAC\SharpJaad.AAC.csproj", "{3C1F7E52-9B2D-4E0A-8C61-5D2A7F4B9E10}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{755F3AEA-0356-4DD7-B724-C5E56F53F094}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{755F3AEA-0356-4DD7-B724-C5E56F53F094}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{755F3AEA-0356-4DD7-B724-C5E56F53F094}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C1F7E52-9B2D-4E0A-8C61-5D2A7F4B9E10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C1F7E52-9B2D-4E0A-8C61-5D2A7F4B9E10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C1F7E52-9B2D-4E0A-8C61-5D2A7F4B9E10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C1F7E52-9B2D-4E0A-8C61-5D2A7F4B9E10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
